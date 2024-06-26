@@ -26,7 +26,7 @@ $(BINDIR)/os-image.bin: $(OBJDIR)/boot.o $(OBJ)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/boot.o: boot.asm
+$(OBJDIR)/boot.o: $(SRCDIR)/boot.asm
 	$(NASM) $(NASMFLAGS) -o $@ $<
 
 clean:
