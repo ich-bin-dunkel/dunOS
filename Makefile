@@ -5,7 +5,7 @@ CC = gcc
 NASM = nasm
 LD = ld
 CFLAGS = -ffreestanding -nostdlib -lgcc
-NASMFLAGS = -f bin
+NASMFLAGS = -f elf
 LDFLAGS = -T linker.ld
 
 # Directories
@@ -26,8 +26,9 @@ $(BINDIR)/os-image.bin: $(OBJDIR)/boot.o $(OBJ)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/boot.o: $(SRCDIR)/boot.asm
-	$(NASM) $(NASMFLAGS) -o $@ $<
+$(OBJDIR)/boot.o: boot.asm
+	mkdir -p $(OBJDIR)
+	$(NASM) $(NASMFLAGS) $< -o $@
 
 clean:
 	rm -rf $(OBJDIR)/*.o $(BINDIR)/os-image.bin
