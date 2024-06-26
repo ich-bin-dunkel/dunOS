@@ -1,43 +1,33 @@
+# Makefile for OS project
+
+# Compiler and flags
 CC = gcc
+NASM = nasm
+LD = ld
 CFLAGS = -ffreestanding -nostdlib -lgcc
+NASMFLAGS = -f bin
+LDFLAGS = -T linker.ld
 
-all: os-image.bin
+# Directories
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-os-image.bin: boot.bin kernel.bin
-    cat boot.bin kernel.bin > os-image.bin
+# Source files
+SRC = $(wildcard $(SRCDIR)/*.c)
+OBJ = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
 
-boot.bin: boot.asm
-    nasm -f bin -o boot.bin boot.asm
+# Targets
+all: $(BINDIR)/os-image.bin
 
-kernel.bin: kernel.o tui.o terminal.o fs.o idt.o paging.o syscall.o editor.o pong.o
-    ld -o kernel.bin -T linker.ld kernel.o tui.o terminal.o fs.o idt.o paging.o syscall.o editor.o pong.o
+$(BINDIR)/os-image.bin: $(OBJDIR)/boot.o $(OBJ)
+    $(LD) $(LDFLAGS) -o $@ $^
 
-kernel.o: kernel.c
-    $(CC) $(CFLAGS) -c kernel.c -o kernel.o
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+    $(CC) $(CFLAGS) -c $< -o $@
 
-tui.o: tui.c tui.h
-    $(CC) $(CFLAGS) -c tui.c -o tui.o
-
-terminal.o: terminal.c terminal.h
-    $(CC) $(CFLAGS) -c terminal.c -o terminal.o
-
-fs.o: fs.c fs.h
-    $(CC) $(CFLAGS) -c fs.c -o fs.o
-
-idt.o: idt.c idt.h
-    $(CC) $(CFLAGS) -c idt.c -o idt.o
-
-paging.o: paging.c paging.h
-    $(CC) $(CFLAGS) -c paging.c -o paging.o
-
-syscall.o: syscall.c syscall.h
-    $(CC) $(CFLAGS) -c syscall.c -o syscall.o
-
-editor.o: editor.c editor.h
-    $(CC) $(CFLAGS) -c editor.c -o editor.o
-
-pong.o: pong.c pong.h
-    $(CC) $(CFLAGS) -c pong.c -o pong.o
+$(OBJDIR)/boot.o: boot.asm
+    $(NASM) $(NASMFLAGS) -o $@ $<
 
 clean:
-    rm -f *.bin *.o os-image.bin
+    rm -rf $(OBJDIR)/*.o $(BINDIR)/os-image.bin
